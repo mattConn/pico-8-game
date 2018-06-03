@@ -16,7 +16,9 @@ player = {
 
 -- platform
 platform = {
-	sprite = 16
+	sprite = 16,
+	x = BOUND-8*3,
+	y = BOUND
 }
 
 function move()
@@ -35,10 +37,13 @@ function _update()
 	player.moving = false
 
 	if btn(0) and player.x != 0 then -- left
-		player.x -= player.speed
-		move()
+		if player.x+8 == platform.x then
+			player.x -= player.speed
+
+			move()
+		end
 	end
-	if btn(1) and player.x != BOUND then -- right
+	if btn(1) and player.x != BOUND and player.x != platform.x-8 then -- right
 		player.x += player.speed
 		move()
 	end
@@ -65,15 +70,25 @@ function _update()
 	if player.y < BOUND and not player.jumping then
 		player.y += player.weight
 	end
-	if player.y > BOUND then
+	if player.y > BOUND then -- fix falling through floor
 		player.y = BOUND
 	end
+
+	-- enldess running
+	if player.x == BOUND then
+		player.x = 0
+	elseif player.x == 0 then
+		player.x = BOUND
+	end
+
 end
 
 function _draw()
 	cls()
 
+	print(player.x)
+	print(platform.x)
+
 	spr(player.sprite,player.x,player.y)
-	-- spr(platform.sprite,SCREEN,SCREEN)
-	spr(17,BOUND, BOUND)
+	spr(platform.sprite,platform.x,platform.y)
 end
