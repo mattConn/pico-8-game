@@ -1,53 +1,79 @@
-pl = { -- pl --
+-- world
+SCREEN = 128 -- screen dimensions
+CELL = 8 -- cell dimensions
+BOUND = SCREEN - CELL -- floor, wall location
+
+-- player
+player = {
 	x = 20,
 	y = 20,
+	jumping = false,
+	timer = 0,
 	sprite = 0,
-	speed = 3
+	speed = 4,
+	weight = 8
+}
+
+-- platform
+platform = {
+	sprite = 16
 }
 
 function move()
-	pl.moving = true
-	pl.sprite += 1
+	player.moving = true
+	player.sprite += 1
 
-	if pl.sprite > 1 then
-		pl.sprite = 0
+	if player.sprite > 1 then
+		player.sprite = 0
 	end
 end
 
+function _init()
+	last = time()
+end
 function _update()
-	pl.moving = false
+	player.moving = false
 
-	if btn(0) then
-		pl.x -= pl.speed
+	if btn(0) and player.x != 0 then -- left
+		player.x -= player.speed
+		move()
+	end
+	if btn(1) and player.x != BOUND then -- right
+		player.x += player.speed
 		move()
 	end
 
-	if btn(1) then
-		pl.x += pl.speed
-		move()
+	-- jumping
+	if btnp(4) then
+		player.jumping = true
+	end
+	if player.jumping then
+		if player.timer < 5 then
+			player.y -= player.weight
+			player.timer += 1
+		else
+			player.jumping = false
+			player.timer = 0
+		end
 	end
 
-	if btn(3) then
-		pl.y += pl.speed
-		move()
+	if not player.moving then -- stationary
+		player.sprite = 0
 	end
 
-	if btn(2) then
-		pl.y -= pl.speed
-		move()
+	-- falling
+	if player.y < BOUND and not player.jumping then
+		player.y += player.weight
 	end
-
-	if not pl.moving then
-		pl.sprite = 0
+	if player.y > BOUND then
+		player.y = BOUND
 	end
 end
 
 function _draw()
 	cls()
 
-	if(btn(0)) then
-		print(btn(0))
-	end
-
-	spr(pl.sprite,pl.x,pl.y)
+	spr(player.sprite,player.x,player.y)
+	-- spr(platform.sprite,SCREEN,SCREEN)
+	spr(17,BOUND, BOUND)
 end
